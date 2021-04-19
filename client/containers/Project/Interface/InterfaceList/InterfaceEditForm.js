@@ -374,7 +374,7 @@ class InterfaceEditForm extends Component {
     EditFormContext = this;
     this._isMounted = true;
     this.setState({
-      req_radio_type: !HTTP_METHOD[this.state.method].request_body ? 'req-body' : 'req-query'
+      req_radio_type: HTTP_METHOD[this.state.method].request_body && HTTP_METHOD[this.state.method].default_tab != 'query' ? 'req-body' : 'req-query'
     });
 
     this.mockPreview = mockEditor({
@@ -971,7 +971,6 @@ class InterfaceEditForm extends Component {
               className="radioGroup"
               onChange={this.changeRadioGroup}
             >
-              
               <RadioButton value="req-query">Query</RadioButton>
               {HTTP_METHOD[this.state.method].request_body ? (
                 <RadioButton value="req-body">Body</RadioButton>
