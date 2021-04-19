@@ -212,38 +212,28 @@ const compareVersions = require('compare-versions');
     } catch (e) {
       api.res_body_type = 'raw';
     }
-    //处理参数
-    function simpleJsonPathParse(key, json) {
-      if (!key || typeof key !== 'string' || key.indexOf('#/') !== 0 || key.length <= 2) {
-        return null;
-      }
-      let keys = key.substr(2).split('/');
-      keys = keys.filter(item => {
-        return item;
-      });
-      for (let i = 0, l = keys.length; i < l; i++) {
-        try {
-          json = json[keys[i]];
-        } catch (e) {
-          json = '';
-          break;
-        }
-      }
-      return json;
-    }
-
+   
+    
     if (data.parameters && Array.isArray(data.parameters)) {
-      data.parameters.forEach(param => {
+      data.parameters.forEach(param => {        
         if (param && typeof param === 'object' && param.$ref) {
-          param = simpleJsonPathParse(param.$ref, { parameters: SwaggerData.parameters });
+          param = simpleJsonPathParse(param.$ref, SwaggerData);
+        } else if(param && typeof param === 'object' && param.schema.$$ref) {
+          param = simpleJsonPathParse(param.schema.$$ref, SwaggerData);
+          handleBodyPamras(param, api);
+          console.log(api)
+          return api;
         }
+       
         let defaultParam = {
           name: param.name,
           desc: param.description,
           required: param.required ? '1' : '0'
         };
 
+
         if (param.in) {
+  
         switch (param.in) {
           case 'path':
             api.req_params.push(defaultParam);
@@ -256,8 +246,8 @@ const compareVersions = require('compare-versions');
             break;
           case 'formData':
             defaultParam.type = param.type === 'file' ? 'file' : 'text';
-			if (param.example) {
-              defaultParam.example = param.example;
+            if (param.example) {
+                    defaultParam.example = param.example;
             }
             api.req_body_form.push(defaultParam);
             break;
@@ -306,6 +296,8 @@ const compareVersions = require('compare-versions');
       if (res && typeof res === 'object') {
         if (res.schema) {
           res_body = JSON.stringify(res.schema, null, 2);
+        } else if (res.content["*/*"].schema.$ref) {
+          res_body = simpleJsonPathParse(res.content["*/*"].schema.$ref, SwaggerData);
         } else if (res.description) {
           res_body = res.description;
         }
@@ -320,6 +312,26 @@ const compareVersions = require('compare-versions');
     return res_body;
   }
 
+   //处理参数
+   function simpleJsonPathParse(key, json) {
+    if (!key || typeof key !== 'string' || key.indexOf('#/') !== 0 || key.length <= 2) {
+      return null;
+    }
+    let keys = key.substr(2).split('/');
+    keys = keys.filter(item => {
+      return item;
+    });
+    for (let i = 0, l = keys.length; i < l; i++) {
+      try {
+       
+        json = json[keys[i]]
+      } catch (e) {
+        json = '';
+        break;
+      }
+    }
+    return json;
+  }
 
 
 

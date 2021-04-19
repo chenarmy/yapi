@@ -3,7 +3,7 @@ module.exports = {
   NAME_LIMIT: 100, // 限制名称的字符长度(中文算两个长度)
   HTTP_METHOD: {
     'GET': {
-      request_body: false,
+      request_body: true,
       default_tab: 'query'
     },
     'POST': {
@@ -23,7 +23,7 @@ module.exports = {
       default_tab: 'query'
     },
     'OPTIONS': {
-      request_body: false,
+      request_body: true,
       default_tab: 'query'
     },
     'PATCH': {
